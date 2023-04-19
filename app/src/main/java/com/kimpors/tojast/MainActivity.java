@@ -5,9 +5,11 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Bundle;
+import android.widget.ThemedSpinnerAdapter;
 
 import com.kimpors.tojast.Adapter.TodoAdapter;
 import com.kimpors.tojast.Model.Todo;
+import com.kimpors.tojast.Repository.Repository;
 
 import java.util.ArrayList;
 import java.util.List;

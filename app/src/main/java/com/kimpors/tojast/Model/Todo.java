@@ -1,6 +1,11 @@
 package com.kimpors.tojast.Model;
 
+import androidx.room.Entity;
+import androidx.room.PrimaryKey;
+
+@Entity(tableName = "todo")
 public class Todo {
+    @PrimaryKey
     private int id;
     private boolean status;
     private String task;
