@@ -1,5 +1,7 @@
 package com.kimpors.tojast.Adapter;
 
+import android.content.Context;
+import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,12 +12,14 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.kimpors.tojast.MainActivity;
 import com.kimpors.tojast.Model.Todo;
 import com.kimpors.tojast.R;
+import com.kimpors.tojast.Repository.Repository;
+import com.kimpors.tojast.Repository.TodoDao;
 
 import java.util.List;
 
-public class TodoAdapter extends RecyclerView.Adapter<TodoAdapter.ViewHolder> {
-
-    private List<Todo> todoList;
+public class TodoAdapter extends RecyclerView.Adapter<TodoAdapter.ViewHolder>
+{
+    private List<Todo> tasks;
     private MainActivity activity;
 
     public TodoAdapter(MainActivity activity)
@@ -30,25 +34,33 @@ public class TodoAdapter extends RecyclerView.Adapter<TodoAdapter.ViewHolder> {
         return new ViewHolder(item);
     }
 
-    public void onBindViewHolder(ViewHolder holder, int positino)
+    public void onBindViewHolder(ViewHolder holder, int position)
     {
-        Todo item = todoList.get(positino);
-        holder.task.setText(item.getTask());
-        holder.task.setChecked(item.getStatus());
-    }
+        Todo task = tasks.get(position);
+        holder.task.setText(task.getTask());
+        holder.task.setChecked(task.getStatus());
 
+        holder.task.setOnCheckedChangeListener((compoundButton, b) ->
+        {
+            updateStatus( compoundButton.getContext(), task.getId(), b);
+        });
+    }
     public int getItemCount()
     {
-        return todoList.size();
+        if(tasks == null)
+            return 0;
+
+        return tasks.size();
     }
 
-    public void setTasks(List<Todo> todoList)
+    public void setTasks(List<Todo> tasks)
     {
-        this.todoList = todoList;
+        this.tasks = tasks;
         notifyDataSetChanged();
     }
 
-    public static class ViewHolder extends  RecyclerView.ViewHolder{
+    public static class ViewHolder extends  RecyclerView.ViewHolder
+    {
         CheckBox task;
 
         public ViewHolder(View view)
@@ -56,5 +68,17 @@ public class TodoAdapter extends RecyclerView.Adapter<TodoAdapter.ViewHolder> {
             super(view);
             task = view.findViewById(R.id.checkbox);
         }
+    }
+
+    public void updateStatus(Context context, int id, boolean status)
+    {
+        new Thread(() ->
+        {
+            TodoDao todoDao = Repository.getInstance(context).todoDao();
+            Todo todo = todoDao.findById(id);
+            todo.setStatus(status);
+            todoDao.update(todo);
+
+        }).start();
     }
 }

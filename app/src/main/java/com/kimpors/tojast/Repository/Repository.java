@@ -2,9 +2,13 @@ package com.kimpors.tojast.Repository;
 
 import android.content.Context;
 
+import androidx.annotation.NonNull;
+import androidx.room.AutoMigration;
 import androidx.room.Database;
 import androidx.room.Room;
 import androidx.room.RoomDatabase;
+import androidx.room.migration.Migration;
+import androidx.sqlite.db.SupportSQLiteDatabase;
 
 import com.kimpors.tojast.Model.Todo;
 

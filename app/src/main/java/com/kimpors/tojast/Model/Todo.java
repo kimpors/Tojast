@@ -5,10 +5,12 @@ import androidx.room.PrimaryKey;
 
 @Entity(tableName = "todo")
 public class Todo {
-    @PrimaryKey
+    @PrimaryKey(autoGenerate = true)
     private int id;
-    private boolean status;
     private String task;
+    private boolean status;
+
+
 
     public int getId() {
         return id;
