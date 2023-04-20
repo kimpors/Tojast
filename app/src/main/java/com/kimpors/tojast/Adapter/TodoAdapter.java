@@ -27,6 +27,8 @@ public class TodoAdapter extends RecyclerView.Adapter<TodoAdapter.ViewHolder>
         this.activity = activity;
     }
 
+    public Context getContext(){return activity;}
+
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType)
     {
         View item = LayoutInflater.from(parent.getContext())
@@ -36,13 +38,13 @@ public class TodoAdapter extends RecyclerView.Adapter<TodoAdapter.ViewHolder>
 
     public void onBindViewHolder(ViewHolder holder, int position)
     {
-        Todo task = tasks.get(position);
+        Todo task = get(position);
         holder.task.setText(task.getTask());
         holder.task.setChecked(task.getStatus());
 
         holder.task.setOnCheckedChangeListener((compoundButton, b) ->
         {
-            updateStatus( compoundButton.getContext(), task.getId(), b);
+            edit(getContext(), position, b);
         });
     }
     public int getItemCount()
@@ -70,15 +72,43 @@ public class TodoAdapter extends RecyclerView.Adapter<TodoAdapter.ViewHolder>
         }
     }
 
-    public void updateStatus(Context context, int id, boolean status)
+    public Todo get(int position)
+    {
+        if(position < 0 || position > getItemCount())
+            return tasks.get(0);
+
+        return tasks.get(position);
+    }
+
+    public void delete(Context context, int position)
     {
         new Thread(() ->
         {
             TodoDao todoDao = Repository.getInstance(context).todoDao();
-            Todo todo = todoDao.findById(id);
-            todo.setStatus(status);
-            todoDao.update(todo);
+            Todo item = tasks.get(position);
+            todoDao.delete(item);
+        }).start();
+    }
 
+//    public void edit(Context context, int position, String text)
+//    {
+//        new Thread(() ->
+//        {
+//            TodoDao todoDao = Repository.getInstance(context).todoDao();
+//            Todo item = tasks.get(position);
+//            item.setTask(text);
+//            todoDao.update(item);
+//        }).start();
+//    }
+
+    public void edit(Context context, int position, boolean status)
+    {
+        new Thread(() ->
+        {
+            TodoDao todoDao = Repository.getInstance(context).todoDao();
+            Todo item = tasks.get(position);
+            item.setStatus(status);
+            todoDao.update(item);
         }).start();
     }
 }

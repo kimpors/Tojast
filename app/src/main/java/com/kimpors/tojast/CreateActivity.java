@@ -19,23 +19,34 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.kimpors.tojast.Adapter.TodoAdapter;
 import com.kimpors.tojast.Model.Todo;
 import com.kimpors.tojast.Repository.Repository;
+import com.kimpors.tojast.Repository.TodoDao;
 
 public class CreateActivity extends AppCompatActivity implements View.OnClickListener, TextWatcher {
 
     private EditText task;
     private Button create;
-
+    private  Todo todo;
+    private int id = -1;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create);
 
+        todo = new Todo();
+
         task = findViewById(R.id.task_edt);
         create = findViewById(R.id.create_btn);
         create.setBackgroundColor(0x22002200);
 
+        Intent intent = getIntent();
+        id = intent.getIntExtra("id", -1);
+        if(id != -1)
+        {
+            setTaskText(this, id);
+        }
 
         task.addTextChangedListener(this);
         create.setOnClickListener(this);
@@ -43,11 +54,27 @@ public class CreateActivity extends AppCompatActivity implements View.OnClickLis
 
     public void insert(Context context, Todo todo)
     {
+        new Thread(() -> Repository.getInstance(context).todoDao().insertAll(todo)).start();
+    }
+
+    public void setTaskText(Context context, int id)
+    {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                Repository.getInstance(context).todoDao().insertAll(todo);
+                todo = Repository.getInstance(context).todoDao().findById(id);
+                task.setText(todo.getTask());
             }
+        }).start();
+    }
+    public void edit(Context context, int id, String text)
+    {
+        new Thread(() ->
+        {
+            TodoDao todoDao = Repository.getInstance(context).todoDao();
+            Todo item = todoDao.findById(id);
+            item.setTask(text);
+            todoDao.update(item);
         }).start();
     }
 
@@ -57,7 +84,15 @@ public class CreateActivity extends AppCompatActivity implements View.OnClickLis
         Todo todo = new Todo();
         todo.setTask(task.getText().toString());
 
-        insert(this, todo);
+        if(id != -1)
+        {
+            edit(this, id, task.getText().toString());
+        }
+        else {
+            insert(this, todo);
+
+        }
+
         setResult(Activity.RESULT_OK, getIntent());
         finish();
     }
