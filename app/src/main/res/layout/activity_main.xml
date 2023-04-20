@@ -28,7 +28,7 @@
         android:layout_alignParentBottom="true"
         android:layout_alignParentEnd="true"
         android:layout_margin="32dp"
-        android:backgroundTint="@android:color/darker_gray"
+        android:backgroundTint="@color/green"
         android:src="@drawable/ic_add"/>
 
 

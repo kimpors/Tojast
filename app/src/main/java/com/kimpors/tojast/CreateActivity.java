@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -26,15 +27,18 @@ public class CreateActivity extends AppCompatActivity implements View.OnClickLis
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create);
 
+        task = findViewById(R.id.task_edt);
+        create = findViewById(R.id.create_btn);
+
         Intent intent = getIntent();
         id = intent.getIntExtra("id", -1);
         if (id != -1) {
             setTaskText(this, id);
+            create.setText("Update");
         }
-
-        task = findViewById(R.id.task_edt);
-        create = findViewById(R.id.create_btn);
-        create.setBackgroundColor(0x22002200);
+        else {
+            create.setEnabled(false);
+        }
 
         task.addTextChangedListener(this);
         create.setOnClickListener(this);
@@ -69,12 +73,6 @@ public class CreateActivity extends AppCompatActivity implements View.OnClickLis
     public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
 
         create.setEnabled(charSequence.length() != 0);
-
-        if (create.isEnabled()) {
-            create.setBackgroundColor(0xFF00FF00);
-        } else {
-            create.setBackgroundColor(0x22002200);
-        }
     }
 
     @Override

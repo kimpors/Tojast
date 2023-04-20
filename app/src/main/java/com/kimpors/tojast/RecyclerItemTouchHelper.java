@@ -18,7 +18,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.kimpors.tojast.Adapter.TodoAdapter;
 
-public class RecyclerItemTouchHelper extends ItemTouchHelper.SimpleCallback implements DialogInterface.OnClickListener, DialogInterface.OnCancelListener {
+public class RecyclerItemTouchHelper extends ItemTouchHelper.SimpleCallback implements DialogInterface.OnClickListener {
     private final TodoAdapter adapter;
     private int position;
 
@@ -41,8 +41,8 @@ public class RecyclerItemTouchHelper extends ItemTouchHelper.SimpleCallback impl
             AlertDialog.Builder builder = new AlertDialog.Builder(adapter.getContext())
                     .setTitle("Delete task")
                     .setMessage("Are you sure you want to delete this task")
-                    .setPositiveButton("Confirm", this)
-                    .setNegativeButton(android.R.string.cancel, this);
+                    .setPositiveButton("Confirm", this::onClick)
+                    .setNegativeButton(android.R.string.cancel, this::onCancel);
 
             AlertDialog dialog = builder.create();
             dialog.show();
@@ -54,6 +54,8 @@ public class RecyclerItemTouchHelper extends ItemTouchHelper.SimpleCallback impl
 
         adapter.notifyDataSetChanged();
     }
+
+
 
     @Override
     public void onChildDraw(@NonNull Canvas c, @NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, float dX, float dY, int actionState, boolean isCurrentlyActive) {
@@ -104,9 +106,7 @@ public class RecyclerItemTouchHelper extends ItemTouchHelper.SimpleCallback impl
         adapter.delete(adapter.getContext(), position);
     }
 
-    @SuppressLint("NotifyDataSetChanged")
-    @Override
-    public void onCancel(DialogInterface dialogInterface) {
+    private void onCancel(DialogInterface dialogInterface, int i) {
         adapter.notifyDataSetChanged();
     }
 }
