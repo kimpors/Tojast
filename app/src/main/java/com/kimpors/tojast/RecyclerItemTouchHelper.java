@@ -1,5 +1,6 @@
 package com.kimpors.tojast;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -10,7 +11,6 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.view.View;
 
-
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.ItemTouchHelper;
@@ -18,51 +18,40 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.kimpors.tojast.Adapter.TodoAdapter;
 
-public class RecyclerItemTouchHelper extends ItemTouchHelper.SimpleCallback {
+public class RecyclerItemTouchHelper extends ItemTouchHelper.SimpleCallback implements DialogInterface.OnClickListener, DialogInterface.OnCancelListener {
+    private final TodoAdapter adapter;
+    private int position;
 
-    private TodoAdapter adapter;
-
-    public RecyclerItemTouchHelper(TodoAdapter adapter)
-    {
+    public RecyclerItemTouchHelper(TodoAdapter adapter) {
         super(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT);
         this.adapter = adapter;
     }
+
     @Override
     public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
         return false;
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     @Override
     public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
-        final int position = viewHolder.getLayoutPosition();
-        if(direction == ItemTouchHelper.LEFT)
-        {
-            AlertDialog.Builder builder = new AlertDialog.Builder(adapter.getContext());
-            builder.setTitle("Delete task");
-            builder.setMessage("Are you shure you want to delte this task");
-            builder.setPositiveButton("Confirm",
-                    new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialogInterface, int i) {
-                            adapter.delete(adapter.getContext(), position);
-                        }
-                    });
-            builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialogInterface, int i) {
-                    adapter.notifyDataSetChanged();
-                }
-            });
+        position = viewHolder.getLayoutPosition();
+
+        if (direction == ItemTouchHelper.LEFT) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(adapter.getContext())
+                    .setTitle("Delete task")
+                    .setMessage("Are you sure you want to delete this task")
+                    .setPositiveButton("Confirm", this)
+                    .setNegativeButton(android.R.string.cancel, this);
 
             AlertDialog dialog = builder.create();
             dialog.show();
-        }
-        else {
+        } else {
             Intent intent = new Intent(adapter.getContext(), CreateActivity.class);
             intent.putExtra("id", adapter.get(position).getId());
             adapter.getContext().startActivity(intent);
-            //TODO edit item
         }
+
         adapter.notifyDataSetChanged();
     }
 
@@ -75,13 +64,10 @@ public class RecyclerItemTouchHelper extends ItemTouchHelper.SimpleCallback {
         Rect bounds = new Rect();
         View item = viewHolder.itemView;
 
-        if(dX > 0)
-        {
-            icon = ContextCompat.getDrawable(adapter.getContext(), R.drawable.ic_edit);
-        }
-        else {
-            icon = ContextCompat.getDrawable(adapter.getContext(), R.drawable.ic_delete);
-        }
+        icon = dX > 0
+                ? ContextCompat.getDrawable(adapter.getContext(), R.drawable.ic_edit)
+                : ContextCompat.getDrawable(adapter.getContext(), R.drawable.ic_delete);
+
 
         background = new ColorDrawable(Color.WHITE);
 
@@ -91,27 +77,36 @@ public class RecyclerItemTouchHelper extends ItemTouchHelper.SimpleCallback {
         bounds.top = item.getTop() + iconMargin;
         bounds.bottom = bounds.top + icon.getIntrinsicHeight();
 
-        if(dX > 0)
-        {
+        if (dX > 0) {
             bounds.left = item.getLeft() + iconMargin;
             bounds.right = item.getLeft() + iconMargin + icon.getIntrinsicWidth();
 
             icon.setBounds(bounds);
-            background.setBounds(item.getLeft(), item.getTop(), item.getLeft()+ ((int)dX) + backgroundCornerOffset, item.getBottom());
-        }
-        else if(dX < 0){
+            background.setBounds(item.getLeft(), item.getTop(), item.getLeft() + ((int) dX) + backgroundCornerOffset, item.getBottom());
+        } else if (dX < 0) {
 
             bounds.left = item.getRight() - iconMargin - icon.getIntrinsicWidth();
             bounds.right = item.getRight() - iconMargin;
 
             icon.setBounds(bounds);
-            background.setBounds(item.getRight() + ((int)dX) - backgroundCornerOffset, item.getTop(), item.getRight(), item.getBottom());
+            background.setBounds(item.getRight() + ((int) dX) - backgroundCornerOffset, item.getTop(), item.getRight(), item.getBottom());
+        } else {
+            background.setBounds(0, 0, 0, 0);
         }
-        else{
-            background.setBounds(0,0,0,0);
-        }
+
 
         background.draw(c);
         icon.draw(c);
+    }
+
+    @Override
+    public void onClick(DialogInterface dialogInterface, int i) {
+        adapter.delete(adapter.getContext(), position);
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    @Override
+    public void onCancel(DialogInterface dialogInterface) {
+        adapter.notifyDataSetChanged();
     }
 }

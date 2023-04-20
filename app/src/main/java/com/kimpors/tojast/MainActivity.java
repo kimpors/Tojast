@@ -9,7 +9,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.Toast;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
@@ -20,32 +19,27 @@ import com.kimpors.tojast.Repository.Repository;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener, Observer<List<Todo>> {
-
-    private RecyclerView view;
-    private FloatingActionButton fab;
-    private ItemTouchHelper touchHelper;
     private TodoAdapter adapter;
     private LiveData<List<Todo>> tasks;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        view = findViewById(R.id.view);
+        RecyclerView view = findViewById(R.id.view);
         view.setLayoutManager(new LinearLayoutManager(this));
         adapter = new TodoAdapter(this);
         view.setAdapter(adapter);
 
-        fab = findViewById(R.id.add);
+        FloatingActionButton fab = findViewById(R.id.add);
         fab.setOnClickListener(this);
 
         tasks =  Repository.getInstance(this)
                 .todoDao().getAll();
         tasks.observe(this, this);
 
-        touchHelper = new ItemTouchHelper(new RecyclerItemTouchHelper(adapter));
+        ItemTouchHelper touchHelper = new ItemTouchHelper(new RecyclerItemTouchHelper(adapter));
         touchHelper.attachToRecyclerView(view);
     }
 
